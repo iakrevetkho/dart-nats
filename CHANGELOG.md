@@ -1,3 +1,7 @@
+## 0.1.10
+* fix client init constructor
+* fix on connect exit from retry loop
+
 ## 0.1.9
 * fix await connection for flutter bug
 * improve docs
