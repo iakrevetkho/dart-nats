@@ -24,6 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      
+      #Setup dart
+      - uses: cedx/setup-dart@v2
 
       - name: Print Dart SDK version
         run: dart --version
