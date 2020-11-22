@@ -50,6 +50,9 @@ jobs:
       # Your project will need to have tests in test/ and a dependency on
       # package:test for this step to succeed. Note that Flutter projects will
       # want to change this to 'flutter test'.
+      - name: Check docker containers
+        run: docker ps
+      - uses: docker://continuumio/anaconda3:2019.07
       - uses: docker://nats:2.1.9
       - name: Run tests
         run: dart test
