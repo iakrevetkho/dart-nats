@@ -2,15 +2,15 @@ name: Dart
 
 on:
   push:
-    branches:    
-      # Push events on master
-      - master
-      # Push events on develop
-      - develop
-    # Sequence of patterns matched against refs/tags
-    tags:        
-      # Push events for every version tag
-      - v*
+#     branches:    
+#       # Push events on master
+#       - master
+#       # Push events on develop
+#       - develop
+#     # Sequence of patterns matched against refs/tags
+#     tags:        
+#       # Push events for every version tag
+#       - v*
 
   pull_request:
     branches:    
@@ -50,8 +50,6 @@ jobs:
       # Your project will need to have tests in test/ and a dependency on
       # package:test for this step to succeed. Note that Flutter projects will
       # want to change this to 'flutter test'.
-      - name: Check docker containers
-        run: docker ps
       - uses: docker://continuumio/anaconda3:2019.07
       - uses: docker://nats:2.1.9
       - name: Run tests
