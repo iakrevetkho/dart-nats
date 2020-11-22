@@ -1,10 +1,8 @@
 import 'dart:async';
-
 import 'client.dart';
 
 /// status connection class
 class Healthcheck {
-
   /// current connection status
   Status status;
 
