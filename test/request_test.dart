@@ -11,7 +11,10 @@ void main() {
       var sub = client.sub('subject1');
       client.pub('subject1', Uint8List.fromList('message1'.codeUnits));
       var msg = await sub.stream.first;
+
+      // Terminate
       client.close();
+      sub.close();
       expect(String.fromCharCodes(msg.data), equals('message1'));
     });
     test('respond', () async {
@@ -31,8 +34,11 @@ void main() {
 
       var receive = await inboxSub.stream.first;
 
+      // Terminate
       requester.close();
+      server.close();
       service.close();
+      inboxSub.close();
       expect(receive.string, equals('respond'));
     });
     test('resquest', () async {
@@ -48,6 +54,8 @@ void main() {
       var receive = await client.request(
           'service', Uint8List.fromList('request'.codeUnits));
 
+      // Terminate
+      server.close();
       client.close();
       service.close();
       expect(receive.string, equals('respond'));
@@ -71,6 +79,8 @@ void main() {
       receive = await client.request(
           'service', Uint8List.fromList('request'.codeUnits));
 
+      // Terminate
+      server.close();
       client.close();
       service.close();
       expect(receive.string, equals('respond'));
