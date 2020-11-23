@@ -9,23 +9,57 @@ Run the `example/main.dart`:
 dart example/main.dart
 ```
 
+### Simple poll example
+
 ```dart
 import 'package:dart_nats_client/dart_nats_client.dart';
 
 void main() async {
+  // Create client instance
   var client = Client();
-  client.connect('localhost');
+  // Connect to server
+  await client.connect('localhost');
+  // Subscribe on topic
   var sub = client.sub('subject1');
+  // Publish string to topic
   client.pubString('subject1', 'message1');
-  var msg = await sub.stream.first;
-
+  // Wait message from topic
+  var msg = await sub.poll();
+  // Print received message
   print(msg.string);
-  client.unSub(sub);
+  // Unsubscribe from topic
+  sub.unSub();
+  // Close client connection
   client.close();
 }
 ```
 
-## Flutter Examples:
+### Listener example
+
+```dart
+import 'package:dart_nats_client/dart_nats_client.dart';
+
+void main() async {
+  // Create client instance
+  var client = Client();
+  // Connect to server
+  await client.connect('localhost');
+  // Subscribe on topic
+  var sub = client.getStream().listen((msg) {
+      print(msg.string);
+    });
+  // Publish string to topic
+  client.pubString('subject1', 'message1');
+  // Some delay for receiving
+  await Future.delayed(Duration(milliseconds: 100));
+  // Unsubscribe from topic
+  sub.unSub();
+  // Close client connection
+  client.close();
+}
+```
+
+## Flutter Examples
 
 Import and Declare object
 ```dart

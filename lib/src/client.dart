@@ -424,8 +424,9 @@ class Client {
       _inboxs[subj] = sub(inbox, queueGroup: queueGroup);
     }
 
-    var stream = _inboxs[subj].stream;
-    var respond = stream.take(1).single;
+    // Get respond from subscription
+    var respond = _inboxs[subj].poll();
+    // Publish reply
     pub(subj, data, replyTo: _inboxs[subj].subject);
 
     // todo timeout
