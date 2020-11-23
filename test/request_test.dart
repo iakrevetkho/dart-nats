@@ -10,18 +10,17 @@ void main() {
       await client.connect('localhost', retryInterval: 1);
       var sub = client.sub('subject1');
       client.pub('subject1', Uint8List.fromList('message1'.codeUnits));
-      var msg = await sub.stream.first;
+      var msg = await sub.poll();
 
       // Terminate
       client.close();
-      sub.close();
       expect(String.fromCharCodes(msg.data), equals('message1'));
     });
     test('respond', () async {
       var server = Client();
       await server.connect('localhost');
       var service = server.sub('service');
-      service.stream.listen((m) {
+      service.getStream().listen((m) {
         m.respondString('respond');
       });
 
@@ -32,20 +31,18 @@ void main() {
 
       requester.pubString('service', 'request', replyTo: inbox);
 
-      var receive = await inboxSub.stream.first;
+      var receive = await inboxSub.poll();
 
       // Terminate
       requester.close();
       server.close();
-      service.close();
-      inboxSub.close();
       expect(receive.string, equals('respond'));
     });
     test('resquest', () async {
       var server = Client();
       await server.connect('localhost');
       var service = server.sub('service');
-      unawaited(service.stream.first.then((m) {
+      unawaited(service.poll().then((m) {
         m.respond(Uint8List.fromList('respond'.codeUnits));
       }));
 
@@ -57,14 +54,13 @@ void main() {
       // Terminate
       server.close();
       client.close();
-      service.close();
       expect(receive.string, equals('respond'));
     });
     test('repeat resquest', () async {
       var server = Client();
       await server.connect('localhost');
       var service = server.sub('service');
-      service.stream.listen((m) {
+      service.getStream().listen((m) {
         m.respond(Uint8List.fromList('respond'.codeUnits));
       });
 
@@ -82,7 +78,6 @@ void main() {
       // Terminate
       server.close();
       client.close();
-      service.close();
       expect(receive.string, equals('respond'));
     });
   });

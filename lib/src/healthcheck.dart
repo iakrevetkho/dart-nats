@@ -8,15 +8,13 @@ class Healthcheck {
 
   final _controller = StreamController<Status>();
 
-  Stream<Status> _stream;
+  // /// Stream with statuses
+  // Stream<Status> _stream;
 
   ///constructor
   Healthcheck(this.status) {
-    _stream = _controller.stream.asBroadcastStream();
+    // _stream = _controller.stream.asBroadcastStream();
   }
-
-  ///Stream output when status is updated
-  Stream<Status> get stream => _stream;
 
   ///add status to stream
   void add(Status status) {

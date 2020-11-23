@@ -16,6 +16,7 @@ class Subscription {
 
   final _controller = StreamController<Message>();
 
+  /// Stream of messages from subsription
   Stream<Message> _stream;
 
   ///constructure
@@ -23,13 +24,20 @@ class Subscription {
     _stream = _controller.stream.asBroadcastStream();
   }
 
-  ///
+  /// Get subscription stream object
+  Stream<Message> getStream() {
+    return _stream;
+  }
+
+  /// Unsubscribe frrom subject
   void unSub() {
     _client.unSub(this);
   }
 
-  ///Stream output when server publish message
-  Stream<Message> get stream => _stream;
+  /// Poll message from server
+  Future<Message> poll() {
+    return _stream.first;
+  }
 
   ///sink messat to listener
   void add(Message msg) {

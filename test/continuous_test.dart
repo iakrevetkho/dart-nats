@@ -1,4 +1,4 @@
-@Timeout(Duration(seconds: 30))
+@Timeout(Duration(seconds: 60))
 import 'package:test/test.dart';
 import 'package:dart_nats_client/dart_nats_client.dart';
 import 'dart:isolate';
@@ -27,7 +27,7 @@ void main() {
       var sub = client.sub('iso');
       var r = 0;
 
-      sub.stream.listen((msg) {
+      sub.getStream().listen((msg) {
         if (r % 1000 == 0) {
           print(msg.string);
         }
