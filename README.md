@@ -69,6 +69,44 @@ Dispose
 
 Full Flutter sample code [example/flutter/main.dart](https://github.com/chartchuo/dart-nats/blob/master/example/flutter/main_dart)
 
+### App permissions
+
+#### Android permissions
+
+For android you need to add to `android/app/src/profile/AndroidManifest` file lines:
+
+```xml
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+```
+
+For activiy in backgroud:
+
+```xml
+<!-- Allows run app in background -->
+<uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND"/>
+<!-- Allows app use data in background -->
+<uses-permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND"/>
+```
+
+#### iOS permissions
+
+For iOS you don't need any specific permissions for NATS client.
+
+But for background activity you need to add to file `ios/Runner/Info.plist` lines:
+
+
+```xml
+<key>UIBackgroundModes</key>
+<array>
+  <string>audio</string>
+  <string>external-accessory</string>
+  <string>fetch</string>
+  <string>processing</string>
+  <string>remote-notification</string>
+</array>
+```
+
 ## Testing
 
 For running unit-tests use `pub run test test/` in project root folder.
@@ -76,6 +114,7 @@ For running unit-tests use `pub run test test/` in project root folder.
 NOTE. For testing you need run NATS in docker. [Instruction](https://docs.nats.io/nats-server/nats_docker)
 
 ## Features
+
 The following is a list of features currently supported and planned by this client:
 
 * [x] - Publish
@@ -84,6 +123,7 @@ The following is a list of features currently supported and planned by this clie
 * [x] - Reconnect to single server when connection lost and resume subscription
 * [x] - Unsubscribe after N message
 * [x] - Request, Respond
+* [ ] - Respond, Request example
 * [x] - Queue subscribe
 * [ ] - caches, flush, drain
 * [ ] - Request timeout
