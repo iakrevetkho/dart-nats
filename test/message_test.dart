@@ -11,6 +11,8 @@ void main() {
       var sub = client.sub('subject1');
       client.pub('subject1', Uint8List.fromList('message1'.codeUnits));
       var msg = await sub.poll();
+
+      // Terminate
       client.close();
       expect(String.fromCharCodes(msg.data), equals('message1'));
     });
@@ -31,10 +33,9 @@ void main() {
 
       var receive = await inboxSub.poll();
 
+      // Terminate
       server.close();
       requester.close();
-      service.close();
-      inboxSub.close();
       expect(receive.string, equals('respond'));
     });
     test('resquest', () async {
@@ -50,7 +51,7 @@ void main() {
       var receive = await client.request(
           'service', Uint8List.fromList('request'.codeUnits));
 
-      client.close();
+      server.close();
       service.close();
       expect(receive.string, equals('respond'));
     });
@@ -66,6 +67,8 @@ void main() {
       print(msg.data);
       msg = await sub.poll();
       print(msg.data);
+
+      // Terminate
       client.close();
       expect(String.fromCharCodes(msg.data), equals(txt));
     });

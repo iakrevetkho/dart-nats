@@ -424,12 +424,12 @@ class Client {
       _inboxs[subj] = sub(inbox, queueGroup: queueGroup);
     }
 
-    // Get respond from subscription
-    var respond = _inboxs[subj].poll();
+    // TODO timeout
+    // TODO refactor
+    var stream = _inboxs[subj].getStream();
+    var respond = stream.take(1).single;
     // Publish reply
     pub(subj, data, replyTo: _inboxs[subj].subject);
-
-    // todo timeout
 
     return respond;
   }
@@ -442,9 +442,11 @@ class Client {
         queueGroup: queueGroup, timeout: timeout);
   }
 
-  ///close connection to NATS server unsub to server but still keep subscription list at client
+  /// Close connection to NATS server unsub to server
   void close() {
-    _backendSubs.forEach((_, s) => s = false);
+    // Clear backend subscriptions
+    _backendSubscriptAll();
+
     _inboxs.clear();
     _socket?.close();
     status = Status.closed;

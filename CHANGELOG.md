@@ -1,3 +1,6 @@
+## 0.1.11
+* improve subscription security
+
 ## 0.1.10
 * fix client init constructor
 * fix on connect exit from retry loop

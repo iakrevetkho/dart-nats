@@ -14,7 +14,6 @@ void main() {
 
       // Terminate
       client.close();
-      sub.close();
       expect(String.fromCharCodes(msg.data), equals('message1'));
     });
     test('respond', () async {
@@ -37,8 +36,6 @@ void main() {
       // Terminate
       requester.close();
       server.close();
-      service.close();
-      inboxSub.close();
       expect(receive.string, equals('respond'));
     });
     test('resquest', () async {
@@ -57,7 +54,6 @@ void main() {
       // Terminate
       server.close();
       client.close();
-      service.close();
       expect(receive.string, equals('respond'));
     });
     test('repeat resquest', () async {
@@ -82,7 +78,6 @@ void main() {
       // Terminate
       server.close();
       client.close();
-      service.close();
       expect(receive.string, equals('respond'));
     });
   });

@@ -1,4 +1,4 @@
-@Timeout(Duration(seconds: 30))
+@Timeout(Duration(seconds: 60))
 import 'package:test/test.dart';
 import 'package:dart_nats_client/dart_nats_client.dart';
 import 'dart:isolate';
