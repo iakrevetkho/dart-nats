@@ -28,9 +28,6 @@ void main() {
       var r = 0;
 
       sub.getStream().listen((msg) {
-        if (r % 1000 == 0) {
-          print(msg.string);
-        }
         r++;
       });
 
