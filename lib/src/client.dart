@@ -440,7 +440,7 @@ class Client {
   // Send data to stream or throw exception if stream in null
   void _add(String str) {
     if (_socket == null)
-      new Exception("Can't perform _add function. Socket is closed.");
+      throw new Exception("Can't perform _add function. Socket is closed.");
     // Add data to socket
     _socket.add(utf8.encode(str + '\r\n'));
   }
@@ -448,7 +448,7 @@ class Client {
   // Send bytes data to stream or throw exception if stream in null
   void _addByte(List<int> msg) {
     if (_socket == null)
-      new Exception("Can't perform _add function. Socket is closed.");
+      throw new Exception("Can't perform _add function. Socket is closed.");
     // Add data
     _socket.add(msg);
     // Add end of line
