@@ -2,15 +2,15 @@ name: Dart
 
 on:
   push:
-#     branches:    
-#       # Push events on master
-#       - master
-#       # Push events on develop
-#       - develop
-#     # Sequence of patterns matched against refs/tags
-#     tags:        
-#       # Push events for every version tag
-#       - v*
+    branches:    
+      # Push events on master
+      - master
+      # Push events on develop
+      - develop
+    # Sequence of patterns matched against refs/tags
+    tags:        
+      # Push events for every version tag
+      - v*
 
   pull_request:
     branches:    
@@ -31,8 +31,11 @@ jobs:
       - name: Print Dart SDK version
         run: dart --version
 
-      - name: Install dependencies
+      - name: Install Dart dependencies
         run: dart pub get
+
+      - name: Install Flutter dependencies for examples
+        run: flutter pub get example/flutter_simple_sub_pub/
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
