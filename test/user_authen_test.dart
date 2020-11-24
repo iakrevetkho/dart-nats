@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:pedantic/pedantic.dart';
+import 'package:uuid/uuid.dart';
 import 'package:test/test.dart';
 import 'package:dart_nats_client/dart_nats_client.dart';
 
@@ -9,24 +9,15 @@ import 'package:dart_nats_client/dart_nats_client.dart';
 
 void main() {
   group('all', () {
-    test('simple', () async {
-      var client = Client();
-      unawaited(client.connect('localhost',
-          retryInterval: 1,
-          connectOption: ConnectOption(user: 'foo', pass: 'bar')));
-      var sub = client.sub('subject1');
-      client.pub('subject1', Uint8List.fromList('message1'.codeUnits));
-      var msg = await sub.poll();
-      client.close();
-      expect(String.fromCharCodes(msg.data), equals('message1'));
-    });
     test('await', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost',
           connectOption: ConnectOption(user: 'foo', pass: 'bar'));
-      var sub = client.sub('subject1');
-      var result = client.pub(
-          'subject1', Uint8List.fromList('message1'.codeUnits),
+      var sub = client.sub(subject);
+      var result = client.pub(subject, Uint8List.fromList('message1'.codeUnits),
           buffer: false);
       expect(result, true);
 

@@ -2,18 +2,18 @@ name: Dart
 
 on:
   push:
-    branches:    
+    branches:
       # Push events on master
       - master
       # Push events on develop
       - develop
     # Sequence of patterns matched against refs/tags
-    tags:        
+    tags:
       # Push events for every version tag
       - v*
 
   pull_request:
-    branches:    
+    branches:
       # Pull requests events on master
       - master
       # Pull requests events on develop
@@ -24,12 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - uses: cedx/setup-dart@v2
 
       - name: Print Dart SDK version
         run: dart --version
-    
+
       - name: Install Dart dependencies
         run: dart pub get
 
@@ -38,9 +38,9 @@ jobs:
 
       - name: Analyze project source
         run: dart analyze
-        
+
       - name: Run NATS container
         run: docker run -d -p 4222:4222 -p 6222:6222 -p 8222:8222 nats:2.1.9
-        
+
       - name: Run tests
         run: dart test
