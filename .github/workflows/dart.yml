@@ -25,6 +25,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
+      # Install Dart
+      - uses: cedx/setup-dart@v2
+
+      - name: Print Dart SDK version
+        run: dart --version
+        
       # Flutter section
       - uses: actions/setup-java@v1
         with:
