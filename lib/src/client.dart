@@ -108,7 +108,7 @@ class Client {
   Client({Logger logger}) : _logger = logger {
     // Check logger or init new
     if (_logger == null) {
-      _logger = Logger(level: Level.nothing);
+      _logger = Logger(level: Level.info);
     }
     // Set status default disconnected
     status = Status.disconnected;
