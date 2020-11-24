@@ -25,33 +25,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      # Install Dart
       - uses: cedx/setup-dart@v2
 
       - name: Print Dart SDK version
         run: dart --version
-        
-      # Flutter section
-      - uses: actions/setup-java@v1
-        with:
-          java-version: '12.x'
-      
-      - uses: subosito/flutter-action@v1
-        with:
-          flutter-version: '1.9.1+hotfix.6'
-      
-      - name: Print Flutter version
-        run: flutter --version
-
-      - name: Install Flutter dependencies for examples
-        run: flutter pub get example/flutter_simple_sub_pub/
-
-      # Dart section
-      - uses: cedx/setup-dart@v2
-
-      - name: Print Dart SDK version
-        run: dart --version
-
+    
       - name: Install Dart dependencies
         run: dart pub get
 

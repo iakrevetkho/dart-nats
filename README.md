@@ -74,14 +74,9 @@ void main() async {
 
 ### Flutter Example
 
-Run with:
+You can find it in `example/simple_listener.dart.flutter`
 
-```sh
-cd example/flutter_simple_sub_pub
-flutter run
-```
-
-Full Flutter sample code in `example/flutter/main.dart`
+For run you need to init Flutter project in your folder with `flutter create .` and copy text from example file to `lib/main.dart`
 
 ### App permissions
 
