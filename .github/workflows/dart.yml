@@ -42,5 +42,5 @@ jobs:
       - name: Run NATS container
         run: docker run -d -p 4222:4222 -p 6222:6222 -p 8222:8222 nats:2.1.9
 
-      - name: Run tests in single thread
-        run: dart test -j 1
+      - name: Run tests
+        run: dart test

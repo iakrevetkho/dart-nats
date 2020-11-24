@@ -3,16 +3,20 @@ import 'dart:typed_data';
 
 import 'package:test/test.dart';
 import 'package:dart_nats_client/dart_nats_client.dart';
+import 'package:uuid/uuid.dart';
 
 //please start nats-server on localhost before testing
 
 void main() {
   group('all', () {
     test('simple', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1');
-      client.pub('subject1', Uint8List.fromList('message1'.codeUnits));
+      var sub = client.sub(subject);
+      client.pub(subject, Uint8List.fromList('message1'.codeUnits));
       var msg = await sub.poll();
       client.close();
       expect(String.fromCharCodes(msg.data), equals('message1'));
@@ -28,89 +32,114 @@ void main() {
       expect(i, 100000);
     });
     test('pub with Uint8List', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1');
+      var sub = client.sub(subject);
       var msgByte = Uint8List.fromList([1, 2, 3, 129, 130]);
-      client.pub('subject1', msgByte);
+      client.pub(subject, msgByte);
       var msg = await sub.poll();
       client.close();
       print(msg.data);
       expect(msg.data, equals(msgByte));
     });
     test('pub with Uint8List include return and  new line', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1');
+      var sub = client.sub(subject);
       var msgByte = Uint8List.fromList(
           [1, 10, 3, 13, 10, 13, 130, 1, 10, 3, 13, 10, 13, 130]);
-      client.pub('subject1', msgByte);
+      client.pub(subject, msgByte);
       var msg = await sub.poll();
       client.close();
       print(msg.data);
       expect(msg.data, equals(msgByte));
     });
     test('byte huge data', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1');
+      var sub = client.sub(subject);
       var msgByte = Uint8List.fromList(
           List<int>.generate(1024 + 1024 * 4, (i) => i % 256));
-      client.pub('subject1', msgByte);
+      client.pub(subject, msgByte);
       var msg = await sub.poll();
       client.close();
       print(msg.data);
       expect(msg.data, equals(msgByte));
     });
     test('UTF8', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1');
+      var sub = client.sub(subject);
       var thaiString = utf8.encode('ทดสอบ');
-      client.pub('subject1', thaiString);
+      client.pub(subject, thaiString);
       var msg = await sub.poll();
       client.close();
       print(msg.data);
       expect(msg.data, equals(thaiString));
     });
     test('pubString ascii', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1');
-      client.pubString('subject1', 'testtesttest');
+      var sub = client.sub(subject);
+      client.pubString(subject, 'testtesttest');
       var msg = await sub.poll();
       client.close();
       print(msg.data);
       expect(msg.string, equals('testtesttest'));
     });
     test('pubString Thai', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1');
-      client.pubString('subject1', 'ทดสอบ');
+      var sub = client.sub(subject);
+      client.pubString(subject, 'ทดสอบ');
       var msg = await sub.poll();
       client.close();
       print(msg.data);
       expect(msg.string, equals('ทดสอบ'));
     });
     test('pub with no buffer ', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1');
+      var sub = client.sub(subject);
       await Future.delayed(Duration(seconds: 1));
-      client.pubString('subject1', 'message1', buffer: false);
+      client.pubString(subject, 'message1', buffer: false);
       var msg = await sub.poll();
       client.close();
       expect(msg.string, equals('message1'));
     });
     test('multiple sub ', () async {
+      // Generate random subject
+      String subject1 = Uuid().v4();
+      String subject2 = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub1 = client.sub('subject1');
-      var sub2 = client.sub('subject2');
+      var sub1 = client.sub(subject1);
+      var sub2 = client.sub(subject2);
       await Future.delayed(Duration(seconds: 1));
-      client.pubString('subject1', 'message1');
-      client.pubString('subject2', 'message2');
+      client.pubString(subject1, 'message1');
+      client.pubString(subject2, 'message2');
       var msg1 = await sub1.poll();
       var msg2 = await sub2.poll();
       client.close();
@@ -118,11 +147,14 @@ void main() {
       expect(msg2.string, equals('message2'));
     });
     test('Wildcard sub * ', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1.*');
-      client.pubString('subject1.1', 'message1');
-      client.pubString('subject1.2', 'message2');
+      var sub = client.sub('$subject.*');
+      client.pubString('$subject.1', 'message1');
+      client.pubString('$subject.2', 'message2');
       var msgStream = sub.getStream().asBroadcastStream();
       var msg1 = await msgStream.first;
       var msg2 = await msgStream.first;
@@ -131,11 +163,14 @@ void main() {
       expect(msg2.string, equals('message2'));
     });
     test('Wildcard sub > ', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1.>');
-      client.pubString('subject1.a.1', 'message1');
-      client.pubString('subject1.b.2', 'message2');
+      var sub = client.sub('$subject.>');
+      client.pubString('$subject.a.1', 'message1');
+      client.pubString('$subject.b.2', 'message2');
       var msgStream = sub.getStream().asBroadcastStream();
       var msg1 = await msgStream.first;
       var msg2 = await msgStream.first;
@@ -144,16 +179,19 @@ void main() {
       expect(msg2.string, equals('message2'));
     });
     test('unsub after connect', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1');
-      client.pubString('subject1', 'message1');
+      var sub = client.sub(subject);
+      client.pubString(subject, 'message1');
       var msg = await sub.poll();
       client.unSub(sub);
       expect(msg.string, equals('message1'));
 
-      sub = client.sub('subject1');
-      client.pubString('subject1', 'message1');
+      sub = client.sub(subject);
+      client.pubString(subject, 'message1');
       msg = await sub.poll();
       sub.unSub();
       expect(msg.string, equals('message1'));
@@ -161,12 +199,15 @@ void main() {
       client.close();
     });
     test('unsub before connect', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('subject1');
+      var sub = client.sub(subject);
       client.unSub(sub);
 
-      sub = client.sub('subject1');
+      sub = client.sub(subject);
       sub.unSub();
       client.close();
       expect(1, 1);
@@ -183,9 +224,12 @@ void main() {
       expect(max, isNotNull);
     });
     test('sub continuous msg', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('sub');
+      var sub = client.sub(subject);
       var r = 0;
       var iteration = 100;
       sub.getStream().listen((msg) {
@@ -193,7 +237,7 @@ void main() {
         r++;
       });
       for (var i = 0; i < iteration; i++) {
-        client.pubString('sub', i.toString());
+        client.pubString(subject, i.toString());
         // await Future.delayed(Duration(milliseconds: 10));
       }
       await Future.delayed(Duration(seconds: 1));
@@ -201,9 +245,12 @@ void main() {
       expect(r, equals(iteration));
     });
     test('sub defect 13 binary', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('sub');
+      var sub = client.sub(subject);
       var r = 0;
       var iteration = 100;
       sub.getStream().listen((msg) {
@@ -211,7 +258,7 @@ void main() {
         r++;
       });
       for (var i = 0; i < iteration; i++) {
-        client.pub('sub', Uint8List.fromList([10, 13, 10]));
+        client.pub(subject, Uint8List.fromList([10, 13, 10]));
         // await Future.delayed(Duration(milliseconds: 10));
       }
       await Future.delayed(Duration(seconds: 1));

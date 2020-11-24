@@ -1,16 +1,22 @@
 @Timeout(Duration(seconds: 60))
 import 'package:test/test.dart';
 import 'package:dart_nats_client/dart_nats_client.dart';
+import 'package:uuid/uuid.dart';
 import 'dart:isolate';
 
-//please start nats-server on localhost before testing
-
+// Number of itterations
 const iteration = 10000;
-void run(SendPort sendPort) async {
+
+void run(List<Object> arguments) async {
+  // Get send port from arguments
+  SendPort sendPort = arguments[0];
+  // Get subject from arguments
+  String subject = arguments[1];
+
   var client = Client();
   await client.connect('localhost');
   for (var i = 0; i < iteration; i++) {
-    client.pubString('iso', i.toString());
+    client.pubString(subject, i.toString());
     //commend out for reproduce issue#4
     await Future.delayed(Duration(milliseconds: 1));
   }
@@ -22,9 +28,12 @@ void run(SendPort sendPort) async {
 void main() {
   group('all', () {
     test('continuous', () async {
+      // Generate random subject
+      String subject = Uuid().v4();
+
       var client = Client();
       await client.connect('localhost');
-      var sub = client.sub('iso');
+      var sub = client.sub(subject);
       var r = 0;
 
       sub.getStream().listen((msg) {
@@ -35,7 +44,7 @@ void main() {
       });
 
       var receivePort = ReceivePort();
-      var iso = await Isolate.spawn(run, receivePort.sendPort);
+      var iso = await Isolate.spawn(run, [receivePort.sendPort, subject]);
       var out = await receivePort.first;
       print(out);
       iso.kill();

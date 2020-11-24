@@ -118,9 +118,8 @@ But for background activity you need to add to file `ios/Runner/Info.plist` line
 
 ## Testing
 
-For running unit-tests use `dart test -j 1` in project root folder.
+For running unit-tests use `dart test` in project root folder.
 
-NOTE. All tests should be run in single thread.
 NOTE. For testing you need run NATS in docker. [Instruction](https://docs.nats.io/nats-server/nats_docker)
 
 ## Features
