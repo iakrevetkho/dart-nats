@@ -28,5 +28,17 @@ void main() {
       client.close();
       expect(String.fromCharCodes(msg.data), equals('message1'));
     });
+    test('retry failed', () async {
+      var client = Client();
+      bool errorCaught = false;
+      // Await connection
+      await client
+          .connect('blabla', retriesCount: 3, timeout: 1, retryInterval: 1)
+          .catchError((Object error) {
+        errorCaught = true;
+      });
+      // Expect error
+      expect(errorCaught, true);
+    });
   });
 }

@@ -97,6 +97,9 @@ class Client {
   /// Instance ID
   int _ssid = 0;
 
+  /// Buffer for operations
+  List<int> _operationsBuffer = [];
+
   /// Default constructor
   Client() {
     // Set status default disconnected
@@ -110,7 +113,7 @@ class Client {
       {int port = 4222,
       ConnectOption connectOption,
       int timeout = 5,
-      bool retry = true,
+      int retriesCount = 5,
       int retryInterval = 10}) async {
     // Init connection controller
     _connectCompleter = Completer();
@@ -125,9 +128,11 @@ class Client {
     _port = port;
     // Check connection options validity and save
     if (connectOption != null) _connectOption = connectOption;
+    // Declare last connection exception for catch exception throw retry connect
+    Exception lastException;
 
     // Start for loop for cennection with retries
-    for (var i = 0; i == 0 || retry; i++) {
+    for (var i = 0; i < retriesCount; i++) {
       if (i == 0) {
         // If first attempt, status - connecting
         status = Status.connecting;
@@ -160,30 +165,41 @@ class Client {
         _backendSubscriptAll();
         // Clear publications buffer
         _flushPubBuffer();
-
-        _buffer = [];
+        // Clear buffer
+        _operationsBuffer = [];
+        // Start lister socket
         _socket.listen((d) {
-          _buffer.addAll(d);
-          while (_receiveState == _ReceiveState.idle && _buffer.contains(13)) {
+          _operationsBuffer.addAll(d);
+          while (_receiveState == _ReceiveState.idle &&
+              _operationsBuffer.contains(13)) {
             _processOp();
           }
         }, onDone: () {
+          // On socket close action
           status = Status.disconnected;
           _healthcheck.add(status);
           _socket.close();
         }, onError: (err) {
+          // On socket error
           status = Status.disconnected;
           _healthcheck.add(status);
           _socket.close();
         });
-        // Exit from loop on success
+        // Exit from retry loop on success
         break;
-      } catch (err) {
+      }
+      // Catch socket exceptions
+      on SocketException catch (ex) {
         // Close connection
         close();
-        // Set error into Completer
-        _connectCompleter.completeError(err);
+        // Save last exception
+        lastException = ex;
       }
+    }
+    // If connection not success, save error
+    if (status != Status.connected) {
+      // Set error into Completer
+      _connectCompleter.completeError(lastException);
     }
 
     return _connectCompleter.future;
@@ -204,24 +220,23 @@ class Client {
     });
   }
 
-  List<int> _buffer = [];
   _ReceiveState _receiveState = _ReceiveState.idle;
   String _receiveLine1 = '';
   void _processOp() async {
     ///find endline
-    var nextLineIndex = _buffer.indexWhere((c) {
+    var nextLineIndex = _operationsBuffer.indexWhere((c) {
       if (c == 13) {
         return true;
       }
       return false;
     });
     if (nextLineIndex == -1) return;
-    var line =
-        String.fromCharCodes(_buffer.sublist(0, nextLineIndex)); // retest
-    if (_buffer.length > nextLineIndex + 2) {
-      _buffer.removeRange(0, nextLineIndex + 2);
+    var line = String.fromCharCodes(
+        _operationsBuffer.sublist(0, nextLineIndex)); // retest
+    if (_operationsBuffer.length > nextLineIndex + 2) {
+      _operationsBuffer.removeRange(0, nextLineIndex + 2);
     } else {
-      _buffer = [];
+      _operationsBuffer = [];
     }
 
     ///decode operation
@@ -276,13 +291,13 @@ class Client {
       replyTo = s[3];
       length = int.parse(s[4]);
     }
-    if (_buffer.length < length) return;
-    var payload = Uint8List.fromList(_buffer.sublist(0, length));
-    // _buffer = _buffer.sublist(length + 2);
-    if (_buffer.length > length + 2) {
-      _buffer.removeRange(0, length + 2);
+    if (_operationsBuffer.length < length) return;
+    var payload = Uint8List.fromList(_operationsBuffer.sublist(0, length));
+    // _operationsBuffer = _operationsBuffer.sublist(length + 2);
+    if (_operationsBuffer.length > length + 2) {
+      _operationsBuffer.removeRange(0, length + 2);
     } else {
-      _buffer = [];
+      _operationsBuffer = [];
     }
 
     if (_subs[sid] != null) {
