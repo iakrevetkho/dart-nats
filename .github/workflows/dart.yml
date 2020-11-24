@@ -31,6 +31,18 @@ jobs:
       - name: Print Dart SDK version
         run: dart --version
 
+      # Install Flutter
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+      
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.9.1+hotfix.6'
+      
+      - name: Print Flutter version
+        run: flutter --version
+
       - name: Install Dart dependencies
         run: dart pub get
 
