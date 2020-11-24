@@ -1,15 +1,18 @@
-# Dart-NATS 
+# Dart NATS Client
+
 A Dart client for the [NATS](https://nats.io) messaging system. Design to use with Dart and flutter.
 
-## Dart Examples:
+## Dart Examples
 
-Run the `example/main.dart`:
-
-```
-dart example/main.dart
-```
+All examples can be found in `example` folder.
 
 ### Simple poll example
+
+Run with:
+
+```sh
+dart example/simple_sub_pub.dart
+```
 
 ```dart
 import 'package:dart_nats_client/dart_nats_client.dart';
@@ -36,6 +39,12 @@ void main() async {
 
 ### Listener example
 
+Run with:
+
+```sh
+dart example/simple_listener.dart
+```
+
 ```dart
 import 'package:dart_nats_client/dart_nats_client.dart';
 
@@ -45,13 +54,17 @@ void main() async {
   // Connect to server
   await client.connect('localhost');
   // Subscribe on topic
-  var sub = client.getStream().listen((msg) {
-      print(msg.string);
-    });
+  var sub = client.sub('subject1');
+  // Subscribe on topic
+  var subListener = sub.getStream().listen((msg) {
+    print(msg.string);
+  });
   // Publish string to topic
   client.pubString('subject1', 'message1');
   // Some delay for receiving
   await Future.delayed(Duration(milliseconds: 100));
+  // Cancel listener
+  await subListener.cancel();
   // Unsubscribe from topic
   sub.unSub();
   // Close client connection
@@ -59,49 +72,11 @@ void main() async {
 }
 ```
 
-## Flutter Examples
+### Flutter Example
 
-Import and Declare object
-```dart
-import 'package:dart_nats_client/dart_nats_client.dart' as nats;
+You can find it in `example/simple_listener.dart.flutter`
 
-  nats.Client natsClient;
-  nats.Subscription fooSub, barSub;
-```
-
-Simply connect to server and subscribe to subject
-```dart
-  void connect() {
-    natsClient = nats.Client();
-    natsClient.connect('demo.nats.io');
-    fooSub = natsClient.sub('foo');
-    barSub = natsClient.sub('bar');
-  }
-```
-Use as Stream in StreamBuilder
-```dart
-          StreamBuilder(
-            stream: fooSub.stream,
-            builder: (context, AsyncSnapshot<nats.Message> snapshot) {
-              return Text(snapshot.hasData ? '${snapshot.data.string}' : '');
-            },
-          ),
-```
-
-Publish Message
-```dart
-      natsClient.pubString('subject','message string');
-```
-
-Dispose 
-```dart
-  void dispose() {
-    natsClient.close();
-    super.dispose();
-  }
-```
-
-Full Flutter sample code [example/flutter/main.dart](https://github.com/chartchuo/dart-nats/blob/master/example/flutter/main_dart)
+For run you need to init Flutter project in your folder with `flutter create .` and copy text from example file to `lib/main.dart`
 
 ### App permissions
 

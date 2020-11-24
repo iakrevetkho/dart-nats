@@ -2,15 +2,15 @@ name: Dart
 
 on:
   push:
-#     branches:    
-#       # Push events on master
-#       - master
-#       # Push events on develop
-#       - develop
-#     # Sequence of patterns matched against refs/tags
-#     tags:        
-#       # Push events for every version tag
-#       - v*
+    branches:    
+      # Push events on master
+      - master
+      # Push events on develop
+      - develop
+    # Sequence of patterns matched against refs/tags
+    tags:        
+      # Push events for every version tag
+      - v*
 
   pull_request:
     branches:    
@@ -25,13 +25,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      #Setup dart
       - uses: cedx/setup-dart@v2
 
       - name: Print Dart SDK version
         run: dart --version
-
-      - name: Install dependencies
+    
+      - name: Install Dart dependencies
         run: dart pub get
 
       - name: Verify formatting
