@@ -77,7 +77,7 @@ void main() async {
 Run with:
 
 ```sh
-cd example/flutter
+cd example/flutter_simple_sub_pub
 flutter run
 ```
 
