@@ -1,3 +1,8 @@
+## 0.1.12
+* add logger
+* fix connection retry exception
+* fix unit tests cocurrent run
+
 ## 0.1.11
 * improve subscription security
 
