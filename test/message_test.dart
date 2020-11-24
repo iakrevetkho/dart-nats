@@ -42,9 +42,9 @@ void main() {
       var server = Client();
       await server.connect('localhost');
       var service = server.sub('service');
-      unawaited(service.poll().then((m) {
-        m.respond(Uint8List.fromList('respond'.codeUnits));
-      }));
+      service.getStream().listen((m) {
+        m.respondString('respond');
+      });
 
       var client = Client();
       await client.connect('localhost');

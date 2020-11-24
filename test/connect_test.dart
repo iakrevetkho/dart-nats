@@ -4,16 +4,25 @@ import 'package:pedantic/pedantic.dart';
 import 'package:test/test.dart';
 import 'package:dart_nats_client/dart_nats_client.dart';
 
+// TODO Make available ru all tests in multi thread mode
 void main() {
   group('all', () {
-    test('simple', () async {
+    test('unwaited', () async {
       var client = Client();
       unawaited(client.connect('localhost', retryInterval: 1));
-      var sub = client.sub('subject1');
-      client.pub('subject1', Uint8List.fromList('message1'.codeUnits));
-      var msg = await sub.poll();
-      client.close();
-      expect(String.fromCharCodes(msg.data), equals('message1'));
+
+      // Publish should send exception
+      try {
+        client.pub('subject1', Uint8List.fromList('message1'.codeUnits));
+      } catch (ex) {
+        expect(ex, TypeMatcher<Exception>());
+      }
+      // Sibscription should send exception
+      try {
+        client.sub('subject1');
+      } catch (ex) {
+        expect(ex, TypeMatcher<Exception>());
+      }
     });
     test('await', () async {
       var client = Client();

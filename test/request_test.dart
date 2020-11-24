@@ -27,15 +27,16 @@ void main() {
       var requester = Client();
       await requester.connect('localhost');
       var inbox = newInbox();
+      // Subscribe on inbox
       var inboxSub = requester.sub(inbox);
-
+      // Send request
       requester.pubString('service', 'request', replyTo: inbox);
 
       var receive = await inboxSub.poll();
 
       // Terminate
-      requester.close();
       server.close();
+      requester.close();
       expect(receive.string, equals('respond'));
     });
     test('resquest', () async {

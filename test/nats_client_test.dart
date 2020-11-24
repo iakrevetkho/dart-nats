@@ -93,15 +93,6 @@ void main() {
       print(msg.data);
       expect(msg.string, equals('ทดสอบ'));
     });
-    test('delay connect', () async {
-      var client = Client();
-      var sub = client.sub('subject1');
-      client.pubString('subject1', 'message1');
-      await client.connect('localhost');
-      var msg = await sub.poll();
-      client.close();
-      expect(msg.string, equals('message1'));
-    });
     test('pub with no buffer ', () async {
       var client = Client();
       await client.connect('localhost');
