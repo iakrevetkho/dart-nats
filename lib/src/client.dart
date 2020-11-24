@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dart_nats_client/dart_nats_client.dart';
+import 'package:logger/logger.dart';
 
 import 'common.dart';
 import 'message.dart';
@@ -100,8 +101,15 @@ class Client {
   /// Buffer for operations
   List<int> _operationsBuffer = [];
 
+  /// Logger instance
+  Logger _logger;
+
   /// Default constructor
-  Client() {
+  Client({Logger logger}) : _logger = logger {
+    // Check logger or init new
+    if (_logger == null) {
+      _logger = Logger(level: Level.nothing);
+    }
     // Set status default disconnected
     status = Status.disconnected;
     // Init healthcheck
@@ -132,15 +140,19 @@ class Client {
     Exception lastException;
 
     // Start for loop for cennection with retries
+    _logger.d("Start connecting loop with $retriesCount retries count");
     for (var i = 0; i < retriesCount; i++) {
+      _logger.d("Connect retry #$i/$retriesCount for connect to $host:$port");
       if (i == 0) {
         // If first attempt, status - connecting
         status = Status.connecting;
+        _logger.d("Connect Status = $status");
         // Add status to health check controller
         _healthcheck.add(status);
       } else {
         // If not first attempt, set status reconnecting
         status = Status.reconnecting;
+        _logger.d("Connect Status = $status");
         // Add status to health check controller
         _healthcheck.add(status);
         // Add delay on retryInterval for next attempt
@@ -155,6 +167,7 @@ class Client {
             timeout: Duration(seconds: timeout));
         // Set status connected after socket was inited
         status = Status.connected;
+        _logger.d("Connect Status = $status");
         // Add status to health check controller
         _healthcheck.add(status);
         // Set complete status to connect controller
@@ -176,12 +189,16 @@ class Client {
           }
         }, onDone: () {
           // On socket close action
+          _logger.d("Socket onDone event");
           status = Status.disconnected;
+          _logger.d("Connect Status = $status");
           _healthcheck.add(status);
           _socket.close();
         }, onError: (err) {
           // On socket error
+          _logger.e("Socket onError event: $err");
           status = Status.disconnected;
+          _logger.d("Connect Status = $status");
           _healthcheck.add(status);
           _socket.close();
         });
@@ -190,6 +207,7 @@ class Client {
       }
       // Catch socket exceptions
       on SocketException catch (ex) {
+        _logger.e("On connection catched socket exception: $ex");
         // Close connection
         close();
         // Save last exception
@@ -199,7 +217,11 @@ class Client {
     // If connection not success, save error
     if (status != Status.connected) {
       // Set error into Completer
+      _logger.e("After all attempts socket is not connected. "
+          "lastException: $lastException");
       _connectCompleter.completeError(lastException);
+    } else {
+      _logger.i("Connected to '$host:$port'");
     }
 
     return _connectCompleter.future;
@@ -327,6 +349,8 @@ class Client {
   ///publish by byte (Uint8List) return true if sucess sending or buffering
   ///return false if not connect
   bool pub(String subject, Uint8List data, {String replyTo, bool buffer}) {
+    _logger.d(
+        "Publish data '$data' to subject '$subject' with reply to '$replyTo'");
     buffer ??= defaultPubBuffer;
     if (status != Status.connected) {
       if (buffer) {
@@ -365,6 +389,7 @@ class Client {
 
   ///subscribe to subject option with queuegroup
   Subscription sub(String subject, {String queueGroup}) {
+    _logger.d("Create subsription on '$subject'");
     _ssid++;
     var s = Subscription(_ssid, subject, this, queueGroup: queueGroup);
     _subs[_ssid] = s;
@@ -385,6 +410,7 @@ class Client {
 
   ///unsubscribe
   bool unSub(Subscription s) {
+    _logger.d("Unsubscribe from '$s.subject'");
     var sid = s.sid;
 
     if (_subs[sid] == null) return false;
@@ -411,54 +437,63 @@ class Client {
     }
   }
 
-  bool _add(String str) {
-    if (_socket == null) return false; //todo throw error
+  // Send data to stream or throw exception if stream in null
+  void _add(String str) {
+    if (_socket == null)
+      new Exception("Can't perform _add function. Socket is closed.");
+    // Add data to socket
     _socket.add(utf8.encode(str + '\r\n'));
-    return true;
   }
 
-  bool _addByte(List<int> msg) {
-    if (_socket == null) return false; //todo throw error
-
+  // Send bytes data to stream or throw exception if stream in null
+  void _addByte(List<int> msg) {
+    if (_socket == null)
+      new Exception("Can't perform _add function. Socket is closed.");
+    // Add data
     _socket.add(msg);
+    // Add end of line
     _socket.add(utf8.encode('\r\n'));
-    return true;
   }
 
   final _inboxs = <String, Subscription>{};
 
   /// Request will send a request payload and deliver the response message,
   /// or an error, including a timeout if no message was received properly.
-  Future<Message> request(String subj, Uint8List data,
+  Future<Message> request(String subject, Uint8List data,
       {String queueGroup, Duration timeout}) {
+    _logger.d("Send request into subject '$subject' "
+        "to queue group '$queueGroup' "
+        " with data '$data'"
+        " and timeout $timeout");
     timeout ??= Duration(seconds: 2);
     data ??= Uint8List(0);
 
-    if (_inboxs[subj] == null) {
+    if (_inboxs[subject] == null) {
       var inbox = newInbox();
-      _inboxs[subj] = sub(inbox, queueGroup: queueGroup);
+      _inboxs[subject] = sub(inbox, queueGroup: queueGroup);
     }
 
     // TODO timeout
     // TODO refactor
-    var stream = _inboxs[subj].getStream();
+    var stream = _inboxs[subject].getStream();
     var respond = stream.take(1).single;
     // Publish reply
-    pub(subj, data, replyTo: _inboxs[subj].subject);
+    pub(subject, data, replyTo: _inboxs[subject].subject);
 
     return respond;
   }
 
   /// requestString() helper to request()
-  Future<Message> requestString(String subj, String data,
+  Future<Message> requestString(String subject, String data,
       {String queueGroup, Duration timeout}) {
     data ??= '';
-    return request(subj, Uint8List.fromList(data.codeUnits),
+    return request(subject, Uint8List.fromList(data.codeUnits),
         queueGroup: queueGroup, timeout: timeout);
   }
 
   /// Close connection to NATS server unsub to server
   void close() {
+    _logger.i("Close connection to '$_host:$_port'");
     // Clear backend subscriptions
     _backendSubscriptAll();
 

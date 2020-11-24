@@ -10,5 +10,8 @@ environment:
 # dependencies:
 
 dev_dependencies:
+  # Unit tests
   test: ^1.9.4
   pedantic: ^1.9.0
+  # Logger
+  logger: ^0.9.4
