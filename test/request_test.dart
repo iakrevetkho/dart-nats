@@ -1,14 +1,19 @@
+/// External packages
 import 'dart:typed_data';
 import 'package:pedantic/pedantic.dart';
 import 'package:test/test.dart';
-import 'package:dart_nats_client/dart_nats_client.dart';
 import 'package:uuid/uuid.dart';
+
+/// Internal packages
+import 'package:dart_nats_client/dart_nats_client.dart';
+
+/// Local packages
 
 void main() {
   group('all', () {
     test('simple', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost', retryInterval: 1);
@@ -22,7 +27,7 @@ void main() {
     });
     test('respond', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var server = Client();
       await server.connect('localhost');
@@ -48,7 +53,7 @@ void main() {
     });
     test('resquest', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var server = Client();
       await server.connect('localhost');
@@ -69,7 +74,7 @@ void main() {
     });
     test('repeat resquest', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var server = Client();
       await server.connect('localhost');

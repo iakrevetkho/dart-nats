@@ -1,8 +1,14 @@
 @Timeout(Duration(seconds: 60))
-import 'package:test/test.dart';
-import 'package:dart_nats_client/dart_nats_client.dart';
-import 'package:uuid/uuid.dart';
+
+/// External packages
 import 'dart:isolate';
+import 'package:test/test.dart';
+import 'package:uuid/uuid.dart';
+
+/// Internal packages
+import 'package:dart_nats_client/dart_nats_client.dart';
+
+/// Local packages
 
 // Number of itterations
 const iteration = 10000;
@@ -29,7 +35,7 @@ void main() {
   group('all', () {
     test('continuous', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -42,7 +48,7 @@ void main() {
 
       var receivePort = ReceivePort();
       var iso = await Isolate.spawn(run, [receivePort.sendPort, subject]);
-      var _ = await receivePort.first;
+      await receivePort.first;
       iso.kill();
       //wait for last message send round trip to server
       await Future.delayed(Duration(seconds: 1));

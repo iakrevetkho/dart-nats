@@ -1,5 +1,10 @@
-import 'dart:typed_data';
+/// External packages
 import 'dart:math';
+import 'dart:typed_data';
+
+/// Internal packages
+
+/// Local packages
 
 const _inboxPrefix = '_INBOX.';
 const _digits =
@@ -25,11 +30,6 @@ String newInbox({bool secure = true}) {
 
 ///nuid port from go nats
 class Nuid {
-  static Uint8List _pre; // check initial
-  static int _seq;
-  static int _inc;
-  static Random _rng;
-
   ///constructure
   Nuid() {
     _pre = Uint8List(_preLen);
@@ -37,6 +37,11 @@ class Nuid {
     randomizePrefix();
     resetSequential();
   }
+
+  static Uint8List _pre; // check initial
+  static int _seq;
+  static int _inc;
+  static Random _rng;
 
   ///generate next nuid
   String next() {
