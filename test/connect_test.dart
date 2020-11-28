@@ -47,7 +47,7 @@ void main() {
       bool errorCaught = false;
       // Await connection
       await client
-          .connect('blabla', retriesCount: 3, timeout: 1, retryInterval: 1)
+          .connect('blabla', retriesCount: 3, retryInterval: 1)
           .catchError((Object error) {
         errorCaught = true;
       });

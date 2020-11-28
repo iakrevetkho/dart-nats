@@ -1,11 +1,14 @@
+// External packages
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'package:web_socket_channel/io.dart';
 import 'dart:typed_data';
-
-import 'package:dart_nats_client/dart_nats_client.dart';
 import 'package:logger/logger.dart';
 
+// Internal packages
+import 'package:dart_nats_client/dart_nats_client.dart';
+
+// Local packages
 import 'common.dart';
 import 'message.dart';
 import 'subscription.dart';
@@ -59,7 +62,7 @@ class Client {
   int _port;
 
   /// Socket connection object
-  Socket _socket;
+  IOWebSocketChannel _socket;
 
   /// Connection info
   Info _info;
@@ -111,7 +114,6 @@ class Client {
   Future connect(String host,
       {int port = 4222,
       ConnectOption connectOption,
-      int timeout = 5,
       int retriesCount = 5,
       int retryInterval = 10}) async {
     // Init connection controller
@@ -150,8 +152,7 @@ class Client {
       try {
         // Init socket connection.
         // On this stage exception can be caught.
-        _socket = await Socket.connect(_host, _port,
-            timeout: Duration(seconds: timeout));
+        _socket = await IOWebSocketChannel.connect("ws://$_host:$_port");
         // Set status connected after socket was inited
         status = Status.connected;
         _logger.d("Connect Status = $status");
@@ -166,7 +167,7 @@ class Client {
         // Clear buffer
         _operationsBuffer = [];
         // Start lister socket
-        _socket.listen((d) {
+        _socket.stream.listen((d) {
           _operationsBuffer.addAll(d);
           while (_receiveState == _ReceiveState.idle &&
               _operationsBuffer.contains(13)) {
@@ -177,20 +178,20 @@ class Client {
           _logger.d("Socket onDone event");
           status = Status.disconnected;
           _logger.d("Connect Status = $status");
-          _socket.close();
+          _socket.sink.close();
         }, onError: (err) {
           // On socket error
           _logger.e("Socket onError event: $err");
           status = Status.disconnected;
           _logger.d("Connect Status = $status");
-          _socket.close();
+          _socket.sink.close();
         });
         // Exit from retry loop on success
         break;
       }
       // Catch socket exceptions
-      on SocketException catch (ex) {
-        _logger.e("On connection catched socket exception: $ex");
+      catch (ex) {
+        _logger.e("On connection catched exception: $ex");
         // Close connection
         close();
         // Save last exception
@@ -425,7 +426,7 @@ class Client {
     if (_socket == null)
       throw new Exception("Can't perform _add function. Socket is closed.");
     // Add data to socket
-    _socket.add(utf8.encode(str + '\r\n'));
+    _socket.sink.add(utf8.encode(str + '\r\n'));
   }
 
   // Send bytes data to stream or throw exception if stream in null
@@ -433,9 +434,9 @@ class Client {
     if (_socket == null)
       throw new Exception("Can't perform _add function. Socket is closed.");
     // Add data
-    _socket.add(msg);
+    _socket.sink.add(msg);
     // Add end of line
-    _socket.add(utf8.encode('\r\n'));
+    _socket.sink.add(utf8.encode('\r\n'));
   }
 
   final _inboxs = <String, Subscription>{};
@@ -481,7 +482,7 @@ class Client {
     _backendSubscriptAll();
 
     _inboxs.clear();
-    _socket?.close();
+    _socket.sink.close();
     status = Status.closed;
   }
 }
