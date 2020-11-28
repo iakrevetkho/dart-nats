@@ -2,11 +2,6 @@ name: Publish Dart Package
 
 on:
   push:
-    branches:
-      # Push events on master
-      - master
-      # Push events on develop
-      - develop
     tags:
       # Push events for every version tag
       - v*
@@ -22,5 +17,5 @@ jobs:
         with:
           credential: ${{ secrets.DART_PUB_CREDS }}
           flutter_package: false
-          skip_test: true
-          dry_run: true
+          skip_test: false
+          dry_run: false
