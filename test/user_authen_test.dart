@@ -1,17 +1,18 @@
+/// External packages
 import 'dart:typed_data';
-
 import 'package:uuid/uuid.dart';
 import 'package:test/test.dart';
+
+/// Internal packages
 import 'package:dart_nats_client/dart_nats_client.dart';
 
-// start nats server using
-// nats-server -DV -m 8222 -user foo -pass bar
+/// Local packages
 
 void main() {
   group('all', () {
     test('await', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost',

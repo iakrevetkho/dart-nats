@@ -1,3 +1,8 @@
+## 0.2.0
+* add web compatability
+* extend examples
+* add static effective dart analysis
+
 ## 0.1.12
 * add logger
 * fix connection retry exception

@@ -7,10 +7,10 @@ import 'package:logger/logger.dart';
 import 'package:universal_io/io.dart';
 
 /// Internal packages
-import 'package:dart_nats_client/dart_nats_client.dart';
 
 /// Local packages
 import 'common.dart';
+import 'inbox.dart';
 import 'message.dart';
 import 'subscription.dart';
 
@@ -42,6 +42,8 @@ enum Status {
 }
 
 class _Pub {
+  _Pub(this.subject, this.data, this.replyTo);
+
   /// Subject of publication
   final String subject;
 
@@ -50,12 +52,20 @@ class _Pub {
 
   /// Name of user if it is reply
   final String replyTo;
-
-  _Pub(this.subject, this.data, this.replyTo);
 }
 
 /// NATS client
 class Client {
+  /// Default constructor
+  Client({Logger logger}) : _logger = logger {
+    // Check logger or init new
+    if (_logger == null) {
+      _logger = Logger(level: Level.info);
+    }
+    // Set status default disconnected
+    status = Status.disconnected;
+  }
+
   /// Host name
   String _host;
 
@@ -100,16 +110,6 @@ class Client {
 
   /// Logger instance
   Logger _logger;
-
-  /// Default constructor
-  Client({Logger logger}) : _logger = logger {
-    // Check logger or init new
-    if (_logger == null) {
-      _logger = Logger(level: Level.info);
-    }
-    // Set status default disconnected
-    status = Status.disconnected;
-  }
 
   /// Connect to NATS server
   Future connect(String host,
@@ -224,9 +224,9 @@ class Client {
   }
 
   void _flushPubBuffer() {
-    _pubBuffer.forEach((p) {
+    for (var p in _pubBuffer) {
       _pub(p);
-    });
+    }
   }
 
   _ReceiveState _receiveState = _ReceiveState.idle;
@@ -327,11 +327,11 @@ class Client {
   }
 
   void _addConnectOption(ConnectOption c) {
-    _add('connect ' + jsonEncode(c.toJson()));
+    _add('connect ${jsonEncode(c.toJson())}');
   }
 
-  ///default buffer action for pub
-  var defaultPubBuffer = true;
+  /// default buffer action for pub
+  bool defaultPubBuffer = true;
 
   ///publish by byte (Uint8List) return true if sucess sending or buffering
   ///return false if not connect
@@ -426,16 +426,18 @@ class Client {
 
   // Send data to stream or throw exception if stream in null
   void _add(String str) {
-    if (_socket == null)
-      throw new Exception("Can't perform _add function. Socket is closed.");
+    if (_socket == null) {
+      throw Exception("Can't perform _add function. Socket is closed.");
+    }
     // Add data to socket
-    _socket.add(utf8.encode(str + '\r\n'));
+    _socket.add(utf8.encode('$str\r\n'));
   }
 
   // Send bytes data to stream or throw exception if stream in null
   void _addByte(List<int> msg) {
-    if (_socket == null)
-      throw new Exception("Can't perform _add function. Socket is closed.");
+    if (_socket == null) {
+      throw Exception("Can't perform _add function. Socket is closed.");
+    }
     // Add data
     _socket.add(msg);
     // Add end of line

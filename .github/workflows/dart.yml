@@ -39,6 +39,9 @@ jobs:
       - name: Analyze project source
         run: dart analyze
 
+      - name: Static Analyze project source
+        run: dartanalyzer --fatal-infos --fatal-warnings .
+
       - name: Run NATS container
         run: docker run -d -p 4222:4222 -p 6222:6222 -p 8222:8222 nats:2.1.9
 

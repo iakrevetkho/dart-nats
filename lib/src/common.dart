@@ -9,6 +9,31 @@ Map<String, dynamic> _removeNull(Map<String, dynamic> data) {
 
 ///NATS Server Info
 class Info {
+  ///constructure
+  Info(
+      {this.serverId,
+      this.serverName,
+      this.version,
+      this.proto,
+      this.go,
+      this.host,
+      this.port,
+      this.maxPayload,
+      this.clientId});
+
+  ///constructure from json
+  Info.fromJson(Map<String, dynamic> json) {
+    serverId = json['server_id'];
+    serverName = json['server_name'];
+    version = json['version'];
+    proto = json['proto'];
+    go = json['go'];
+    host = json['host'];
+    port = json['port'];
+    maxPayload = json['max_payload'];
+    clientId = json['client_id'];
+  }
+
   /// sever id
   String serverId;
 
@@ -36,37 +61,6 @@ class Info {
   ///client id assigned by server
   int clientId;
 
-  //todo
-  //authen required
-  //tls_required
-  //tls_verify
-  //connect_url
-
-  ///constructure
-  Info(
-      {this.serverId,
-      this.serverName,
-      this.version,
-      this.proto,
-      this.go,
-      this.host,
-      this.port,
-      this.maxPayload,
-      this.clientId});
-
-  ///constructure from json
-  Info.fromJson(Map<String, dynamic> json) {
-    serverId = json['server_id'];
-    serverName = json['server_name'];
-    version = json['version'];
-    proto = json['proto'];
-    go = json['go'];
-    host = json['host'];
-    port = json['port'];
-    maxPayload = json['max_payload'];
-    clientId = json['client_id'];
-  }
-
   ///convert to json
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
@@ -86,7 +80,34 @@ class Info {
 
 ///connection option to send to server
 class ConnectOption {
-  ///NATS server send +OK or not (default nats server is turn on)  this client will auto tuen off as after connect
+  ///construcure
+  ConnectOption(
+      {this.verbose,
+      this.pedantic,
+      this.authToken,
+      this.user,
+      this.pass,
+      this.tlsRequired,
+      this.name,
+      this.lang,
+      this.version,
+      this.protocol});
+
+  ///constructure from json
+  ConnectOption.fromJson(Map<String, dynamic> json) {
+    verbose = json['verbose'];
+    pedantic = json['pedantic'];
+    tlsRequired = json['tls_required'];
+    authToken = json['authToken'];
+    user = json['user'];
+    pass = json['pass'];
+    name = json['name'];
+    lang = json['lang'];
+    version = json['version'];
+    protocol = json['protocol'];
+  }
+
+  /// Verbose flag
   bool verbose;
 
   ///
@@ -96,7 +117,7 @@ class ConnectOption {
   bool tlsRequired;
 
   /// Auehtnticatio Token
-  String auth_token;
+  String authToken;
 
   /// username
   String user;
@@ -116,40 +137,13 @@ class ConnectOption {
   ///protocol
   int protocol;
 
-  ///construcure
-  ConnectOption(
-      {this.verbose,
-      this.pedantic,
-      this.auth_token,
-      this.user,
-      this.pass,
-      this.tlsRequired,
-      this.name,
-      this.lang,
-      this.version,
-      this.protocol});
-
-  ///constructure from json
-  ConnectOption.fromJson(Map<String, dynamic> json) {
-    verbose = json['verbose'];
-    pedantic = json['pedantic'];
-    tlsRequired = json['tls_required'];
-    auth_token = json['auth_token'];
-    user = json['user'];
-    pass = json['pass'];
-    name = json['name'];
-    lang = json['lang'];
-    version = json['version'];
-    protocol = json['protocol'];
-  }
-
   ///export to json
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
     data['verbose'] = verbose;
     data['pedantic'] = pedantic;
     data['tls_required'] = tlsRequired;
-    data['auth_token'] = auth_token;
+    data['authToken'] = authToken;
     data['user'] = user;
     data['pass'] = pass;
     data['name'] = name;

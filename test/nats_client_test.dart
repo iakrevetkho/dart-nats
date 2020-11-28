@@ -1,17 +1,19 @@
+/// External packages
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:test/test.dart';
-import 'package:dart_nats_client/dart_nats_client.dart';
 import 'package:uuid/uuid.dart';
 
-//please start nats-server on localhost before testing
+/// Internal packages
+import 'package:dart_nats_client/dart_nats_client.dart';
+
+/// Local packages
 
 void main() {
   group('all', () {
     test('simple', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -33,7 +35,7 @@ void main() {
     });
     test('pub with Uint8List', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -47,7 +49,7 @@ void main() {
     });
     test('pub with Uint8List include return and  new line', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -62,7 +64,7 @@ void main() {
     });
     test('byte huge data', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -77,7 +79,7 @@ void main() {
     });
     test('UTF8', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -91,7 +93,7 @@ void main() {
     });
     test('pubString ascii', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -104,7 +106,7 @@ void main() {
     });
     test('pubString Thai', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -117,7 +119,7 @@ void main() {
     });
     test('pub with no buffer ', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -130,8 +132,8 @@ void main() {
     });
     test('multiple sub ', () async {
       // Generate random subject
-      String subject1 = Uuid().v4();
-      String subject2 = Uuid().v4();
+      var subject1 = Uuid().v4();
+      var subject2 = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -148,7 +150,7 @@ void main() {
     });
     test('Wildcard sub * ', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -164,7 +166,7 @@ void main() {
     });
     test('Wildcard sub > ', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -180,7 +182,7 @@ void main() {
     });
     test('unsub after connect', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -200,7 +202,7 @@ void main() {
     });
     test('unsub before connect', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -225,7 +227,7 @@ void main() {
     });
     test('sub continuous msg', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');
@@ -246,7 +248,7 @@ void main() {
     });
     test('sub defect 13 binary', () async {
       // Generate random subject
-      String subject = Uuid().v4();
+      var subject = Uuid().v4();
 
       var client = Client();
       await client.connect('localhost');

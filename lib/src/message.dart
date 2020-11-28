@@ -9,6 +9,9 @@ import 'client.dart';
 
 /// Message class
 class Message {
+  ///constructure
+  Message(this.subject, this.sid, this.data, this._client, {this.replyTo});
+
   ///subscriber id auto generate by client
   final int sid;
 
@@ -18,9 +21,6 @@ class Message {
 
   ///payload of data in byte
   final Uint8List data;
-
-  ///constructure
-  Message(this.subject, this.sid, this.data, this._client, {this.replyTo});
 
   ///payload in string
   String get string => utf8.decode(data);

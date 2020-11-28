@@ -4,8 +4,8 @@ import 'dart:async';
 /// Internal packages
 
 /// Local packages
-import 'message.dart';
 import 'client.dart';
+import 'message.dart';
 
 /// subscription class
 class Subscription {
