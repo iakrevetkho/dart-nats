@@ -9,7 +9,6 @@ import 'package:logger/logger.dart';
 import 'common.dart';
 import 'message.dart';
 import 'subscription.dart';
-import 'healthcheck.dart';
 
 enum _ReceiveState {
   idle, //op=msg -> msg
@@ -74,17 +73,11 @@ class Client {
   /// Status of the client
   Status status;
 
-  /// Healthcheck status
-  Healthcheck _healthcheck;
-
   /// Connection options
   var _connectOption = ConnectOption(verbose: false);
 
   ///server info
   Info get info => _info;
-
-  ///connection status
-  Healthcheck get healthcheck => _healthcheck;
 
   /// Subscriptions map
   final _subs = <int, Subscription>{};
@@ -112,8 +105,6 @@ class Client {
     }
     // Set status default disconnected
     status = Status.disconnected;
-    // Init healthcheck
-    _healthcheck = Healthcheck(status);
   }
 
   /// Connect to NATS server
@@ -147,14 +138,10 @@ class Client {
         // If first attempt, status - connecting
         status = Status.connecting;
         _logger.d("Connect Status = $status");
-        // Add status to health check controller
-        _healthcheck.add(status);
       } else {
         // If not first attempt, set status reconnecting
         status = Status.reconnecting;
         _logger.d("Connect Status = $status");
-        // Add status to health check controller
-        _healthcheck.add(status);
         // Add delay on retryInterval for next attempt
         await Future.delayed(Duration(seconds: retryInterval));
       }
@@ -168,8 +155,6 @@ class Client {
         // Set status connected after socket was inited
         status = Status.connected;
         _logger.d("Connect Status = $status");
-        // Add status to health check controller
-        _healthcheck.add(status);
         // Set complete status to connect controller
         _connectCompleter.complete();
         // Add connecton options
@@ -192,14 +177,12 @@ class Client {
           _logger.d("Socket onDone event");
           status = Status.disconnected;
           _logger.d("Connect Status = $status");
-          _healthcheck.add(status);
           _socket.close();
         }, onError: (err) {
           // On socket error
           _logger.e("Socket onError event: $err");
           status = Status.disconnected;
           _logger.d("Connect Status = $status");
-          _healthcheck.add(status);
           _socket.close();
         });
         // Exit from retry loop on success
@@ -500,6 +483,5 @@ class Client {
     _inboxs.clear();
     _socket?.close();
     status = Status.closed;
-    _healthcheck.add(status);
   }
 }
