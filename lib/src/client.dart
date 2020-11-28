@@ -1,15 +1,18 @@
+// External packages
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:socket_io_client/socket_io_client.dart' as socketio;
 import 'dart:typed_data';
-
-import 'package:dart_nats_client/dart_nats_client.dart';
 import 'package:logger/logger.dart';
 
+// Internal packages
+import 'package:dart_nats_client/dart_nats_client.dart';
+
+// Local packages
 import 'common.dart';
 import 'message.dart';
 import 'subscription.dart';
-import 'healthcheck.dart';
 
 enum _ReceiveState {
   idle, //op=msg -> msg
@@ -60,7 +63,7 @@ class Client {
   int _port;
 
   /// Socket connection object
-  Socket _socket;
+  socketio.Socket _socket;
 
   /// Connection info
   Info _info;
@@ -74,17 +77,11 @@ class Client {
   /// Status of the client
   Status status;
 
-  /// Healthcheck status
-  Healthcheck _healthcheck;
-
   /// Connection options
   var _connectOption = ConnectOption(verbose: false);
 
   ///server info
   Info get info => _info;
-
-  ///connection status
-  Healthcheck get healthcheck => _healthcheck;
 
   /// Subscriptions map
   final _subs = <int, Subscription>{};
@@ -108,12 +105,10 @@ class Client {
   Client({Logger logger}) : _logger = logger {
     // Check logger or init new
     if (_logger == null) {
-      _logger = Logger(level: Level.info);
+      _logger = Logger(level: Level.debug);
     }
     // Set status default disconnected
     status = Status.disconnected;
-    // Init healthcheck
-    _healthcheck = Healthcheck(status);
   }
 
   /// Connect to NATS server
@@ -147,72 +142,75 @@ class Client {
         // If first attempt, status - connecting
         status = Status.connecting;
         _logger.d("Connect Status = $status");
-        // Add status to health check controller
-        _healthcheck.add(status);
       } else {
         // If not first attempt, set status reconnecting
         status = Status.reconnecting;
         _logger.d("Connect Status = $status");
-        // Add status to health check controller
-        _healthcheck.add(status);
         // Add delay on retryInterval for next attempt
         await Future.delayed(Duration(seconds: retryInterval));
       }
 
-      // Try-Catch socket exceptions
-      try {
-        // Init socket connection.
-        // On this stage exception can be caught.
-        _socket = await Socket.connect(_host, _port,
-            timeout: Duration(seconds: timeout));
+      // Init socket connection.
+      _socket = socketio.io(
+          "$_host:$_port",
+          socketio.OptionBuilder()
+              .disableAutoConnect() // disable auto-connection
+              .build());
+      // Connect to server
+      _socket.connect();
+      // On connect callback
+      _socket.onConnect((_) {
+        _logger.d("Connected to NATS broker '$_host:$_port'");
         // Set status connected after socket was inited
         status = Status.connected;
         _logger.d("Connect Status = $status");
-        // Add status to health check controller
-        _healthcheck.add(status);
-        // Set complete status to connect controller
-        _connectCompleter.complete();
-        // Add connecton options
-        _addConnectOption(_connectOption);
-        // Clear backend subscriptions
-        _backendSubscriptAll();
-        // Clear publications buffer
-        _flushPubBuffer();
-        // Clear buffer
-        _operationsBuffer = [];
-        // Start lister socket
-        _socket.listen((d) {
-          _operationsBuffer.addAll(d);
-          while (_receiveState == _ReceiveState.idle &&
-              _operationsBuffer.contains(13)) {
-            _processOp();
-          }
-        }, onDone: () {
-          // On socket close action
-          _logger.d("Socket onDone event");
-          status = Status.disconnected;
-          _logger.d("Connect Status = $status");
-          _healthcheck.add(status);
-          _socket.close();
-        }, onError: (err) {
-          // On socket error
-          _logger.e("Socket onError event: $err");
-          status = Status.disconnected;
-          _logger.d("Connect Status = $status");
-          _healthcheck.add(status);
-          _socket.close();
-        });
-        // Exit from retry loop on success
-        break;
+      });
+      // On error callback
+      _socket.onConnectError((err) {
+        _logger.e(
+            "Error occured while connecting to NATS broker '$_host:$_port': $err");
+      });
+      // On timeout callback
+      _socket.onConnectTimeout((_) {
+        _logger.e(
+            "Timeout reached while connecting to NATS broker '$_host:$_port'.");
+      });
+      // Set complete status to connect controller
+      _connectCompleter.complete();
+      // Add connecton options
+      _addConnectOption(_connectOption);
+      // Clear backend subscriptions
+      _backendSubscriptAll();
+      // Clear publications buffer
+      _flushPubBuffer();
+      // Clear buffer
+      _operationsBuffer = [];
+      // Start lister socket
+      // _socket.listen((d) {
+      //   _operationsBuffer.addAll(d);
+      //   while (_receiveState == _ReceiveState.idle &&
+      //       _operationsBuffer.contains(13)) {
+      //     _processOp();
+      //   }
+      // }, onDone: () {
+      //   // On socket close action
+      //   _logger.d("Socket onDone event");
+      //   status = Status.disconnected;
+      //   _logger.d("Connect Status = $status");
+      //   _socket.close();
+      // }, onError: (err) {
+      //   // On socket error
+      //   _logger.e("Socket onError event: $err");
+      //   status = Status.disconnected;
+      //   _logger.d("Connect Status = $status");
+      //   _socket.close();
+      // });
+      while (true) {
+        sleep(Duration(seconds: 1));
+        print("wait");
       }
-      // Catch socket exceptions
-      on SocketException catch (ex) {
-        _logger.e("On connection catched socket exception: $ex");
-        // Close connection
-        close();
-        // Save last exception
-        lastException = ex;
-      }
+      // Exit from retry loop on success
+      break;
     }
     // If connection not success, save error
     if (status != Status.connected) {
@@ -442,7 +440,7 @@ class Client {
     if (_socket == null)
       throw new Exception("Can't perform _add function. Socket is closed.");
     // Add data to socket
-    _socket.add(utf8.encode(str + '\r\n'));
+    _socket.emit("", utf8.encode(str + '\r\n'));
   }
 
   // Send bytes data to stream or throw exception if stream in null
@@ -450,9 +448,9 @@ class Client {
     if (_socket == null)
       throw new Exception("Can't perform _add function. Socket is closed.");
     // Add data
-    _socket.add(msg);
+    _socket.emit("", msg);
     // Add end of line
-    _socket.add(utf8.encode('\r\n'));
+    _socket.emit("", utf8.encode('\r\n'));
   }
 
   final _inboxs = <String, Subscription>{};
@@ -500,6 +498,5 @@ class Client {
     _inboxs.clear();
     _socket?.close();
     status = Status.closed;
-    _healthcheck.add(status);
   }
 }
