@@ -1,6 +1,9 @@
-///subscription model
+/// External packages
 import 'dart:async';
 
+/// Internal packages
+
+/// Local packages
 import 'message.dart';
 import 'client.dart';
 

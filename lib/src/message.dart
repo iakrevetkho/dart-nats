@@ -1,7 +1,10 @@
-///message model sending from NATS server
+/// External packages
 import 'dart:convert';
 import 'dart:typed_data';
 
+/// Internal packages
+
+/// Local packages
 import 'client.dart';
 
 /// Message class

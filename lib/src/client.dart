@@ -1,11 +1,15 @@
+/// External packages
 import 'dart:async';
 import 'dart:convert';
-import 'package:universal_io/io.dart';
 import 'dart:typed_data';
 
-import 'package:dart_nats_client/dart_nats_client.dart';
 import 'package:logger/logger.dart';
+import 'package:universal_io/io.dart';
 
+/// Internal packages
+import 'package:dart_nats_client/dart_nats_client.dart';
+
+/// Local packages
 import 'common.dart';
 import 'message.dart';
 import 'subscription.dart';

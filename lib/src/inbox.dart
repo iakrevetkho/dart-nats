@@ -1,5 +1,10 @@
+/// External packages
 import 'dart:typed_data';
 import 'dart:math';
+
+/// Internal packages
+
+/// Local packages
 
 const _inboxPrefix = '_INBOX.';
 const _digits =
