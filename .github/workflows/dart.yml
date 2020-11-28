@@ -3,8 +3,6 @@ name: Dart
 on:
   push:
     branches:
-      # Push events on master
-      - master
       # Push events on develop
       - develop
     # Sequence of patterns matched against refs/tags
@@ -16,8 +14,6 @@ on:
     branches:
       # Pull requests events on master
       - master
-      # Pull requests events on develop
-      - develop
 
 jobs:
   build:
